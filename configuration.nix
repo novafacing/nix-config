@@ -88,6 +88,7 @@ in let
     sold
     pkgs.vscode
     pkgs.kitty
+    pkgs.dmenu
     pkgs.python311Full
     pkgs.llvmPackages_16.clang
     pkgs.llvmPackages_16.compiler-rt
@@ -114,6 +115,13 @@ in {
   };
   environment = {
     darwinConfig = "$HOME/config/configuration.nix";
+    etc = {
+      "sudoers.d/10-nix-commands" = {
+        text = let yabai = "${pkgs.yabai}/bin/yabai";
+        in let hash = builtins.hashFile "sha256" "${yabai}";
+        in "${username} ALL=(root) NOPASSWD: sha256:${hash} ${yabai} --load-sa";
+      };
+    };
     systemPackages = [
       pkgs.darwin.apple_sdk.frameworks.System
       pkgs.darwin.apple_sdk.frameworks.CoreFoundation
@@ -464,62 +472,62 @@ in {
             ];
             keybindings = [
               {
-                key = "ctrl+l";
+                key = "Ctrl+l";
                 command = "workbench.action.focusRightGroup";
               }
               {
-                key = "ctrl+k ctrl+right";
+                key = "Ctrl+k Ctrl+right";
                 command = "-workbench.action.focusRightGroup";
               }
               {
-                key = "ctrl+h";
+                key = "Ctrl+h";
                 command = "workbench.action.focusLeftGroup";
               }
               {
-                key = "ctrl+k ctrl+left";
+                key = "Ctrl+k Ctrl+left";
                 command = "-workbench.action.focusLeftGroup";
               }
               {
-                key = "ctrl+shift+\\";
+                key = "Ctrl+shift+\\";
                 command = "-workbench.action.terminal.focusTabs";
                 when =
                   "terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported || terminalHasBeenCreated && terminalTabsFocus || terminalProcessSupported && terminalTabsFocus";
               }
               {
-                key = "ctrl+k";
+                key = "Ctrl+k";
                 command = "workbench.action.focusActiveEditorGroup";
               }
               {
-                key = "ctrl+o";
+                key = "Ctrl+o";
                 command = "workbench.action.files.openFolder";
                 when = "true";
               }
               {
-                key = "ctrl+j";
+                key = "Ctrl+j";
                 command = "-workbench.action.togglePanel";
               }
               {
-                key = "ctrl+j";
-                command = "-extension.vim_ctrl+j";
+                key = "Ctrl+j";
+                command = "-extension.vim_Ctrl+j";
                 when =
                   "editorTextFocus && vim.active && vim.use<C-j> && !inDebugRepl";
               }
               {
-                key = "ctrl+j";
+                key = "Ctrl+j";
                 command = "workbench.action.terminal.focus";
               }
               {
-                key = "ctrl+shift+k";
+                key = "Ctrl+shift+k";
                 command = "workbench.action.files.showOpenedFileInNewWindow";
                 when = "emptyWorkspaceSupport";
               }
               {
-                key = "ctrl+k o";
+                key = "Ctrl+k o";
                 command = "-workbench.action.files.showOpenedFileInNewWindow";
                 when = "emptyWorkspaceSupport";
               }
               {
-                key = "ctrl+l";
+                key = "Ctrl+l";
                 command = "workbench.action.terminal.focusNextPane";
                 when =
                   "terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported";
@@ -531,7 +539,7 @@ in {
                   "terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported";
               }
               {
-                key = "ctrl+h";
+                key = "Ctrl+h";
                 command = "workbench.action.terminal.focusPreviousPane";
                 when =
                   "terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported";
@@ -543,7 +551,7 @@ in {
                   "terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported";
               }
               {
-                key = "ctrl+o";
+                key = "Ctrl+o";
                 command = "-workbench.action.files.openFile";
                 when = "true";
               }
@@ -955,49 +963,67 @@ in {
     };
     skhd = {
       enable = true;
-      skhdConfig = "";
+      skhdConfig = ''
+                cmd - h: yabai -m window --focus west
+                cmd - l: yabai -m window --focus east
+                cmd - j: yabai -m window --focus south
+                cmd - k: yabai -m window --focus north
+                cmd - 1: yabai -m space --focus 1
+                cmd - 2: yabai -m space --focus 2
+                cmd - 3: yabai -m space --focus 3
+                cmd - 4: yabai -m space --focus 4
+                cmd - 5: yabai -m space --focus 5
+                cmd - 6: yabai -m space --focus 6
+                cmd + shift - 1: yabai -m window --space 1
+                cmd + shift - 2: yabai -m window --space 1
+                cmd + shift - 3: yabai -m window --space 1
+                cmd + shift - 4: yabai -m window --space 1
+                cmd + shift - 5: yabai -m window --space 1
+                cmd + shift - 6: yabai -m window --space 1
+                cmd - v: yabai -m window --insert east
+                cmd - e: yabai -m window --insert south
+                cmd - f: yabai -m window --toggle zoom-fullscreen
+                cmd + shift - q: yabai -m window --close
+                cmd - return: ${pkgs.kitty}/bin/kitty --single-instance -d ~
+                cmd - n: yabai -m window --toggle float
+        	cmd - d: ${pkgs.dmenu}/bin/dmenu
+                :: resize @ : yabai -m config active_window_border_color 0xffa9b665
+                cmd - r; resize
+                resize < escape ; default
+                resize < h: yabai -m window --resize left:-20:0 ; yabai -m window --resize right:-20:0
+                resize < l: yabai -m window --resize right:20:0 ; yabai -m window --resize left:20:0
+                resize < j: yabai -m window --resize bottom:0:20 ; yabai -m window --resize top:0:20
+                resize < k: yabai -m window --resize top:0:-20 ; yabai -m window --resize bottom:0:-20
+      '';
     };
-    /* spacebar = {
-           enable = true;
-           package = pkgs.spacebar;
-           config = {
-               position                   = "top";
-               display                    = "main";
-               height                     = 34;
-               title                      = "off";
-               spaces                     = "off";
-               clock                      = "on";
-               power                      = "on";
-               padding_left               = 20;
-               padding_right              = 20;
-               spacing_left               = 25;
-               spacing_right              = 15;
-               text_font                  = ''"Fisa Code:Regular:12.0"'';
-               icon_font                  = ''"Font Awesome 6 Free:Solid:12.0"'';
-               background_color           = "0xff252423";
-               foreground_color           = "0xffd4be98";
-               power_icon_color           = "0xffa9b665";
-               battery_icon_color         = "0xffa9b665";
-               dnd_icon_color             = "0xffe78a4e";
-               clock_icon_color           = "0xff7daea3";
-               power_icon_strip           = " ";
-               spaces_for_all_displays    = "on";
-               display_separator          = "on";
-               display_separator_icon     = "";
-               clock_icon                 = "";
-               dnd_icon                   = "";
-               clock_format               = ''"%d/%m/%y %R"'';
-               right_shell                = "on";
-               right_shell_icon           = "";
-               right_shell_command        = "whoami";
-           };
-           extraConfig = "";
-       };
-    */
     yabai = {
       enable = true;
-      config = { };
-      extraConfig = "";
+      enableScriptingAddition = true;
+      config = {
+        debug_output = "on";
+        layout = "bsp";
+        window_gap = 8;
+        top_padding = 8;
+        bottom_padding = 8;
+        left_padding = 8;
+        right_padding = 8;
+        mouse_modifier = "fn";
+        mouse_action1 = "resize";
+        mouse_action2 = "move";
+        focus_follows_mouse = "autofocus";
+        mouse_follows_focus = "on";
+        window_topmost = "off";
+        window_shadow = "float";
+      };
+      extraConfig = ''
+        yabai -m space --create
+        yabai -m space --create
+        yabai -m space --create
+        yabai -m space --create
+        yabai -m space --create
+        yabai -m space --create
+        echo "Yabai configuration loaded..."
+      '';
     };
   };
   # Nix-darwin does not link installed applications to the user environment. This means apps will not show up
@@ -1038,6 +1064,10 @@ in {
               done
         '';
       };
+      postUserActivation = {
+        text =
+          "  /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u\n";
+      };
     };
     stateVersion = stateVersion;
     defaults = {
@@ -1050,8 +1080,8 @@ in {
         AppleScrollerPagingBehavior = true;
         AppleShowAllExtensions = true;
         AppleShowAllFiles = true;
-        AppleShowScrollBars = "Automatic";
-        AppleWindowTabbingMode = "always";
+        AppleShowScrollBars = "Always";
+        AppleWindowTabbingMode = "manual";
         NSAutomaticCapitalizationEnabled = false;
         NSAutomaticDashSubstitutionEnabled = false;
         NSAutomaticPeriodSubstitutionEnabled = false;
@@ -1076,6 +1106,42 @@ in {
         "com.apple.trackpad.enableSecondaryClick" = true;
         "com.apple.trackpad.scaling" = 1.0;
         "com.apple.trackpad.trackpadCornerClickBehavior" = 1;
+      };
+      spaces = { spans-displays = false; };
+      screencapture = {
+        disable-shadow = true;
+        location = "/Users/${username}/screenshots";
+        type = "png";
+      };
+      trackpad = {
+        Clicking = false;
+        TrackpadRightClick = true;
+        TrackpadThreeFingerDrag = true;
+      };
+      universalaccess = {
+        closeViewScrollWheelToggle = true;
+        reduceTransparency = true;
+      };
+      CustomUserPreferences = {
+        NSGlobalDomain = { WebkitDeveloperExtras = true; };
+        "com.apple.Safari" = {
+          UniversalSearchEnabled = false;
+          SupressSearchSuggestions = false;
+          WebKitTabToLinksPreferenceKey = true;
+          ShowFullURLInSmartSearchField = true;
+          AutoOpenSafeDownloads = false;
+          ShowFavoritesBar = true;
+          IncludeInternalDebugMenu = true;
+          IncludeDevelopMenu = true;
+          WebKitDeveloperExtrasEnabledPreferenceKey = true;
+          WebContinuousSpellCheckingEnabled = true;
+          WebAutomaticSpellingCorrectionEnabled = false;
+        };
+        "com.apple.AdLib" = { allowApplePersonalizedAdvertising = false; };
+        "com.apple.SoftwareUpdate" = { AutomaticCheckEnabled = true; };
+        "com.apple.ImageCapture" = { disableHotPlug = true; };
+        "com.apple.commerce" = { AutoUpdate = false; };
+
       };
     };
     keyboard = {
