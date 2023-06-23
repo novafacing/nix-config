@@ -975,11 +975,11 @@ in {
                 cmd - 5: yabai -m space --focus 5
                 cmd - 6: yabai -m space --focus 6
                 cmd + shift - 1: yabai -m window --space 1
-                cmd + shift - 2: yabai -m window --space 1
-                cmd + shift - 3: yabai -m window --space 1
-                cmd + shift - 4: yabai -m window --space 1
-                cmd + shift - 5: yabai -m window --space 1
-                cmd + shift - 6: yabai -m window --space 1
+                cmd + shift - 2: yabai -m window --space 2
+                cmd + shift - 3: yabai -m window --space 3
+                cmd + shift - 4: yabai -m window --space 4
+                cmd + shift - 5: yabai -m window --space 5
+                cmd + shift - 6: yabai -m window --space 6
                 cmd - v: yabai -m window --insert east
                 cmd - e: yabai -m window --insert south
                 cmd - f: yabai -m window --toggle zoom-fullscreen
