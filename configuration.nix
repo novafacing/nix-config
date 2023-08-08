@@ -9,9 +9,9 @@
 let
   username = "novafacing";
   name = "chaos";
-  fenix = import
-    (fetchTarball "https://github.com/nix-community/fenix/archive/main.tar.gz")
-    { };
+  # fenix = import
+  #   (fetchTarball "https://github.com/nix-community/fenix/archive/main.tar.gz")
+  #   { };
   fisa-code = pkgs.callPackage ({ lib, stdenvNoCC, fetchFromGitHub }:
     stdenvNoCC.mkDerivation rec {
       pname = "fisa-code";
@@ -82,28 +82,59 @@ let
   stateVersion = 4;
 in let
   home-packages = [
-    fenix.default.toolchain
-    fenix.rust-analyzer-vscode-extension
-    fenix.rust-analyzer
-    sold
-    pkgs.vscode
-    pkgs.kitty
+    # fenix.default.toolchain
+    # fenix.rust-analyzer
+    pkgs.asciinema
+    pkgs.autoconf
+    pkgs.autoconf-archive
+    pkgs.automake
+    pkgs.coreutils
+    pkgs.cmake
     pkgs.dmenu
-    pkgs.python311Full
-    pkgs.llvmPackages_16.clang
-    pkgs.llvmPackages_16.compiler-rt
-    pkgs.llvmPackages_16.libclang
-    pkgs.llvmPackages_16.libcxx
-    pkgs.llvmPackages_16.libcxxabi
-    pkgs.llvmPackages_16.libllvm
-    pkgs.llvmPackages_16.libunwind
-    pkgs.llvmPackages_16.lld
-    pkgs.llvmPackages_16.lldb
-    pkgs.llvmPackages_16.openmp
     pkgs.fd
-    pkgs.silver-searcher
+    (lib.hiPrio pkgs.gcc)
+    pkgs.imagemagick
+    pkgs.jdk17
+    pkgs.kitty
+    pkgs.libconfig
+    pkgs.libev
+    pkgs.libiconv
+    pkgs.libslirp
+    pkgs.libtool
+    pkgs.nodejs_20
+    pkgs.openssl
+    # Use system clang
+    # pkgs.llvmPackages_16.clang
+    # pkgs.llvmPackages_16.compiler-rt
+    # pkgs.llvmPackages_16.libclang
+    # pkgs.llvmPackages_16.libcxx
+    # pkgs.llvmPackages_16.libcxxabi
+    # pkgs.llvmPackages_16.libllvm
+    # pkgs.llvmPackages_16.libunwind
+    # pkgs.llvmPackages_16.lld
+    # pkgs.llvmPackages_16.lldb
+    # pkgs.llvmPackages_16.openmp
+    pkgs.meson
+    pkgs.nasm
     pkgs.nil
+    pkgs.ninja
     pkgs.nixfmt
+    pkgs.nssTools
+    pkgs.openssl
+    pkgs.p7zip
+    pkgs.pcre
+    pkgs.pcre2
+    pkgs.pixman
+    pkgs.pkg-config
+    pkgs.python311Full
+    pkgs.silver-searcher
+    pkgs.sqlite
+    pkgs.tidal-dl
+    pkgs.vscode
+    pkgs.wget
+    pkgs.podman
+    pkgs.qemu
+    sold
   ];
 in {
   imports = [ <home-manager/nix-darwin> ];
@@ -123,13 +154,22 @@ in {
       };
     };
     systemPackages = [
-      pkgs.darwin.apple_sdk.frameworks.System
-      pkgs.darwin.apple_sdk.frameworks.CoreFoundation
-      pkgs.darwin.apple_sdk.frameworks.CoreServices
+      # Use system frameworks
+      # pkgs.darwin.apple_sdk.frameworks.System
+      # pkgs.darwin.apple_sdk.frameworks.Security
+      # pkgs.darwin.apple_sdk.frameworks.CoreFoundation
+      # pkgs.darwin.apple_sdk.frameworks.CoreServices
+      # pkgs.darwin.apple_sdk.frameworks.CoreData
+      # pkgs.darwin.apple_sdk.frameworks.Foundation
+      # pkgs.darwin.apple_sdk.frameworks.Kernel
+      # pkgs.darwin.apple_sdk.frameworks.MetalKit
+      # pkgs.darwin.apple_sdk.frameworks.OpenCL
+      # pkgs.darwin.apple_sdk.frameworks.SystemConfiguration
     ];
     systemPath = [ ];
     shellAliases = { };
-    variables = { };
+    variables = { 
+    };
   };
   fonts = {
     fontDir = { enable = true; };
@@ -156,14 +196,15 @@ in {
             enableSyntaxHighlighting = true;
             enableVteIntegration = true;
             envExtra = ''
-                                          [[ -o login ]] && export PATH='/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:''${PATH}'
-              			    if [ -e '/nix/var/nix/profiles/etc/profile.d/nix-daemon.sh' ]; then
-              			    	. '/nix/var/nix/profiles/etc/profile.d/nix-daemon.sh'
-              			    fi
-              			    [[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
-              			    export NIX_PATH="''${NIX_PATH}:darwin-config=/Users/${username}/config/configuration.nix:/Users/${username}/.nix-defexpr/channels"
-                                          export PATH="''${HOME}/install/bin/:''${PATH}"
-                                          export PATH="''${HOME}/.nix-profile/bin/:''${PATH}"
+                [[ -o login ]] && export PATH='/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:''${PATH}'
+                if [ -e '/nix/var/nix/profiles/etc/profile.d/nix-daemon.sh' ]; then
+                . '/nix/var/nix/profiles/etc/profile.d/nix-daemon.sh'
+                fi
+                [[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
+                export NIX_PATH="''${NIX_PATH}:darwin-config=/Users/${username}/config/configuration.nix:/Users/${username}/.nix-defexpr/channels"
+                export PATH="''${PATH}:''${HOME}/install/bin/"
+                export PATH="''${PATH}:''${HOME}/.nix-profile/bin/"
+                export PKG_CONFIG_PATH="''${PKG_CONFIG_PATH}:${pkgs.openssl.dev}/lib/pkgconfig/"
             '';
             history = {
               ignoreDups = true;
@@ -222,6 +263,9 @@ in {
             enable = true;
             aliases = {
               status = "status --sort --branch";
+              ignore = "update-index --assume-unchanged";
+              unignore = "update-index --no-assume-unchanged";
+              ignored = ''!git ls-files -v | grep "^[[:lower:]]"'';
               grog =
                 "log --graph --abbrev-commit --decorate --all --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(dim white) - %an%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n %C(white)%s%C(reset)'";
 
@@ -341,7 +385,22 @@ in {
                 user = "grobot";
 
               };
+	      zalera = {
+	      	hostname = "192.168.0.177";
+		user = "novafacing";
+	      };
+	      shemhazi = {
+	      	hostname = "192.168.0.181";
+		user = "novafacing";
+	      };
+	      rhart-desk = {
+	      	hostname = "192.168.0.186";
+		user = "rhart";
+	      };
             };
+            includes = [
+               "/Users/${username}/.ssh/config.work"
+            ];
           };
           starship = {
             enable = true;
@@ -424,7 +483,7 @@ in {
               pkgs.vscode-extensions.esbenp.prettier-vscode
               # pkgs.vscode-extensions.exodiusstudios.comment-anchors
               pkgs.vscode-extensions.formulahendry.auto-rename-tag
-              # pkgs.vscode-extensions.github.copilot
+              pkgs.vscode-extensions.github.copilot
               pkgs.vscode-extensions.github.vscode-pull-request-github
               # pkgs.vscode-extensions.inferrinizzard.prettier-sql-vscode
               pkgs.vscode-extensions.james-yu.latex-workshop
@@ -461,6 +520,7 @@ in {
               pkgs.vscode-extensions.redhat.vscode-yaml
               # pkgs.vscode-extensions.richie5um2.vscode-sort-json
               pkgs.vscode-extensions.rust-lang.rust-analyzer
+    	      # fenix.rust-analyzer-vscode-extension
               # pkgs.vscode-extensions.sainnhe.gruvbox-material
               pkgs.vscode-extensions.serayuzgur.crates
               pkgs.vscode-extensions.tamasfe.even-better-toml
@@ -847,7 +907,7 @@ in {
               "vim.textwidth" = 88;
               "window.menuBarVisibility" = "toggle";
               "window.restoreWindows" = "none";
-              "window.zoomLevel" = -2;
+              "window.zoomLevel" = -1.5;
               "workbench.colorCustomizations" = {
                 "editorBracketHighlight.foreground1" = "#ea6962";
                 "editorBracketHighlight.foreground2" = "#d3869b";
@@ -885,19 +945,14 @@ in {
               enable = true;
               text = ''
                 [target.aarch64-apple-darwin]
-                linker = "clang"
+                linker = "/usr/bin/clang"
                 rustflags = [
                     "-C",
                     "link-arg=--ld-path=${sold}/bin/ld64.mold",
-                    #"-L",
-                    #"${pkgs.darwin.apple_sdk.frameworks.CoreFoundation}/Library/Frameworks/",
-                    #"-L",
-                    #"${pkgs.darwin.apple_sdk.frameworks.System}/Library/Frameworks/",
-                    #"-L",
-                    #"${pkgs.darwin.apple_sdk.frameworks.CoreFoundation}/lib/swift",
-                    #"-L",
-                    #"${pkgs.darwin.apple_sdk.frameworks.System}/lib/swift/",
                 ]
+                
+                [net]
+                git-fetch-with-cli = true
               '';
             };
           };
@@ -980,9 +1035,9 @@ in {
                 cmd + shift - 4: yabai -m window --space 4
                 cmd + shift - 5: yabai -m window --space 5
                 cmd + shift - 6: yabai -m window --space 6
-                cmd - v: yabai -m window --insert east
-                cmd - e: yabai -m window --insert south
-                cmd - f: yabai -m window --toggle zoom-fullscreen
+                rcmd - e: yabai -m window --insert east
+                rcmd - v: yabai -m window --insert south
+                rcmd - f: yabai -m window --toggle zoom-fullscreen
                 cmd + shift - q: yabai -m window --close
                 cmd - return: ${pkgs.kitty}/bin/kitty --single-instance -d ~
                 cmd - n: yabai -m window --toggle float
