@@ -92,9 +92,12 @@ in let
     pkgs.cmake
     pkgs.dmenu
     pkgs.fd
+    pkgs.ffmpeg
     (lib.hiPrio pkgs.gcc)
+    pkgs.id3v2
     pkgs.imagemagick
     pkgs.jdk17
+    pkgs.gradle
     pkgs.kitty
     pkgs.libconfig
     pkgs.libev
@@ -134,6 +137,7 @@ in let
     pkgs.wget
     pkgs.podman
     pkgs.qemu
+    pkgs.yq
     sold
   ];
 in {
@@ -394,7 +398,7 @@ in {
 		user = "novafacing";
 	      };
 	      rhart-desk = {
-	      	hostname = "192.168.0.186";
+	      	hostname = "192.168.0.16";
 		user = "rhart";
 	      };
             };
@@ -725,6 +729,8 @@ in {
                 "plaintext" = false;
                 "yaml" = false;
               };
+              "github.copilot.editor.enableAutoCompletions" = true;
+              "github.copilot.editor.enableCodeActions" = false;
               "githubPullRequests.createOnPublishBranch" = "never";
               "githubPullRequests.remotes" = [ "origin" ];
               "gruvboxMaterial.colorfulSyntax" = true;
